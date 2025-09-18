@@ -19,33 +19,33 @@ Web Platform Baseline brings clarity to information about browser support for we
 
 ## Development Tools
 
-- [Chrome DevTools](https://developer.chrome.com/docs/devtools/) - Built-in Baseline information for CSS properties in the Elements panel.
+- [Chrome DevTools](https://developer.chrome.com/docs/devtools/) - Chrome 140+ shows Baseline status for CSS properties in Elements panel hover cards.
 - [Browserslist](https://github.com/browserslist/browserslist) - Share target browsers between different front-end tools with Baseline query support.
 - [browserslist-config-baseline](https://www.npmjs.com/package/browserslist-config-baseline) - Apply specific Baseline targets to your toolchain in Vite, Babel, and PostCSS.
 
 ## Code Editors & IDEs
 
-- [Visual Studio Code](https://code.visualstudio.com/) - Ships with native Baseline support for CSS and HTML in its standard build.
-- [WebStorm](https://www.jetbrains.com/webstorm/) - Intelligent IDE with baseline-aware CSS completion and validation.
+- [Visual Studio Code](https://code.visualstudio.com/) - Ships with native Baseline support for CSS and HTML in version 1.100+.
+- [WebStorm](https://www.jetbrains.com/webstorm/) - WebStorm 2025.2+ displays Web Platform Baseline status in documentation popup.
 
 ## Build Tools & Bundlers
 
-- [Vite](https://vitejs.dev/) - Fast build tool with Baseline integration via browserslist-config-baseline.
+- [Vite](https://vitejs.dev/) - Fast build tool with `baseline-widely-available` as default browser target.
 - [Webpack](https://webpack.js.org/) - Module bundler with Baseline support through browserslist configuration.
-- [Parcel](https://parceljs.org/) - Zero-configuration build tool with automatic Baseline compatibility checks.
-- [PostCSS](https://postcss.org/) - CSS processor with Baseline-aware plugins and transformations.
-- [Babel](https://babeljs.io/) - JavaScript compiler with Baseline target support for feature polyfills.
+- [Parcel](https://parceljs.org/) - Build tool with Baseline support through browserslist integration.
+- [PostCSS](https://postcss.org/) - CSS processor that supports Baseline via browserslist configuration.
+- [Babel](https://babeljs.io/) - JavaScript compiler with Baseline target support through browserslist integration.
 
 ## Linting & Code Quality
 
-- [ESLint](https://eslint.org/) - Linting tool that can enforce Baseline CSS features and browser compatibility.
-- [Stylelint](https://stylelint.io/) - CSS linter with Baseline-aware rules for cross-browser compatibility.
+- [ESLint](https://eslint.org/) - JavaScript and CSS linter with `use-baseline` rule via @eslint/css plugin.
+- [Stylelint](https://stylelint.io/) - CSS linter with Baseline support through browserslist configuration.
 
 ## CSS Tools
 
-- [Autoprefixer](https://github.com/postcss/autoprefixer) - PostCSS plugin to parse CSS and add vendor prefixes using Baseline data.
-- [CSS Feature Queries](https://developer.mozilla.org/en-US/docs/Web/CSS/@supports) - Native CSS support detection aligned with Baseline status.
-- [Modernizr](https://modernizr.com/) - Feature detection library that complements Baseline information.
+- [Autoprefixer](https://github.com/postcss/autoprefixer) - PostCSS plugin to parse CSS and add vendor prefixes using Can I Use data (which includes Baseline).
+- [CSS Feature Queries](https://developer.mozilla.org/en-US/docs/Web/CSS/@supports) - Native CSS `@supports` rule for feature detection.
+- [Modernizr](https://modernizr.com/) - JavaScript feature detection library for progressive enhancement.
 
 ## Browser Support Tools
 
@@ -62,30 +62,30 @@ Web Platform Baseline brings clarity to information about browser support for we
 
 ## AI-Powered Development
 
-- [GitHub Copilot](https://github.com/features/copilot) - AI-powered coding assistant with awareness of browser compatibility and Baseline features.
-- [Amazon CodeWhisperer](https://aws.amazon.com/codewhisperer/) - AI code generator that considers cross-browser compatibility in suggestions.
-- [Tabnine](https://www.tabnine.com/) - AI code completion with Baseline-aware suggestions for web technologies.
+- [GitHub Copilot](https://github.com/features/copilot) - AI-powered coding assistant for code completion and chat assistance.
+- [Amazon CodeWhisperer](https://aws.amazon.com/codewhisperer/) - AWS-focused AI code generator with cloud development features.
+- [Tabnine](https://www.tabnine.com/) - AI code completion tool supporting multiple languages and IDEs.
 
 ## Performance & Monitoring
 
-- [Core Web Vitals](https://web.dev/vitals/) - Performance metrics that align with Baseline standards for optimal user experience.
-- [Lighthouse](https://developers.google.com/web/tools/lighthouse) - Automated tool for improving web page quality with Baseline-compatible recommendations.
-- [WebPageTest](https://www.webpagetest.org/) - Website performance testing with cross-browser baseline analysis.
+- [Core Web Vitals](https://web.dev/vitals/) - Web performance metrics (LCP, INP, CLS) for measuring user experience.
+- [Lighthouse](https://developers.google.com/web/tools/lighthouse) - Automated tool for auditing web page performance, accessibility, and SEO.
+- [WebPageTest](https://www.webpagetest.org/) - Website performance testing tool with real browser analysis.
 
 ## Testing Tools
 
-- [Playwright](https://playwright.dev/) - Cross-browser testing framework supporting all Baseline core browsers.
-- [Puppeteer](https://pptr.dev/) - Node library for controlling Chrome with Baseline feature testing capabilities.
-- [Selenium](https://selenium.dev/) - Browser automation framework for testing across Baseline-supported browsers.
-- [BrowserStack](https://www.browserstack.com/) - Cloud-based cross-browser testing platform covering all Baseline browsers.
+- [Playwright](https://playwright.dev/) - Cross-browser testing framework supporting Chromium, Firefox, and WebKit.
+- [Puppeteer](https://pptr.dev/) - Node.js library for controlling headless Chrome and Chromium browsers.
+- [Selenium](https://selenium.dev/) - Browser automation framework for testing across multiple browsers.
+- [BrowserStack](https://www.browserstack.com/) - Cloud-based cross-browser testing platform with 3000+ browser environments.
 
 ## Frameworks & Libraries
 
-- [Next.js 15](https://nextjs.org/) - React framework with built-in Baseline compatibility and performance optimizations.
-- [Vue 3.5](https://vuejs.org/) - Progressive JavaScript framework with Baseline-aware feature detection.
-- [Nuxt 4](https://nuxtjs.org/) - Vue.js framework with automatic Baseline compatibility checks.
-- [SvelteKit](https://kit.svelte.dev/) - Svelte framework with modern baseline feature support.
-- [Angular](https://angular.io/) - Platform for building applications with Baseline-compatible tooling.
+- [Next.js](https://nextjs.org/) - React framework with performance optimizations and modern browser targeting.
+- [Vue.js](https://vuejs.org/) - Progressive JavaScript framework for building user interfaces.
+- [Nuxt](https://nuxtjs.org/) - Vue.js framework with server-side rendering and static site generation.
+- [SvelteKit](https://kit.svelte.dev/) - Full-stack web framework built on top of Svelte.
+- [Angular](https://angular.io/) - Platform and framework for building single-page client applications using HTML and TypeScript.
 
 
 ## Contributing
