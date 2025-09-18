@@ -10,12 +10,8 @@ Web Platform Baseline brings clarity to information about browser support for we
 - [Code Editors & IDEs](#code-editors--ides)
 - [Build Tools & Bundlers](#build-tools--bundlers)
 - [Linting & Code Quality](#linting--code-quality)
-- [CSS Tools](#css-tools)
 - [Browser Support Tools](#browser-support-tools)
 - [Documentation & Resources](#documentation--resources)
-- [AI-Powered Development](#ai-powered-development)
-- [Performance & Monitoring](#performance--monitoring)
-- [Testing Tools](#testing-tools)
 
 ## Development Tools
 
@@ -41,11 +37,6 @@ Web Platform Baseline brings clarity to information about browser support for we
 - [ESLint](https://eslint.org/) - JavaScript and CSS linter with `use-baseline` rule via @eslint/css plugin.
 - [Stylelint](https://stylelint.io/) - CSS linter with Baseline support through browserslist configuration.
 
-## CSS Tools
-
-- [Autoprefixer](https://github.com/postcss/autoprefixer) - PostCSS plugin to parse CSS and add vendor prefixes using Can I Use data (which includes Baseline).
-- [CSS Feature Queries](https://developer.mozilla.org/en-US/docs/Web/CSS/@supports) - Native CSS `@supports` rule for feature detection.
-- [Modernizr](https://modernizr.com/) - JavaScript feature detection library for progressive enhancement.
 
 ## Browser Support Tools
 
@@ -60,32 +51,9 @@ Web Platform Baseline brings clarity to information about browser support for we
 - [Baseline 2024](https://web.dev/baseline/2024/) - Features that became interoperable in 2024.
 - [WebDX Community Group](https://www.w3.org/community/webdx/) - Community group that defines Baseline standards.
 
-## AI-Powered Development
 
-- [GitHub Copilot](https://github.com/features/copilot) - AI-powered coding assistant for code completion and chat assistance.
-- [Amazon CodeWhisperer](https://aws.amazon.com/codewhisperer/) - AWS-focused AI code generator with cloud development features.
-- [Tabnine](https://www.tabnine.com/) - AI code completion tool supporting multiple languages and IDEs.
 
-## Performance & Monitoring
 
-- [Core Web Vitals](https://web.dev/vitals/) - Web performance metrics (LCP, INP, CLS) for measuring user experience.
-- [Lighthouse](https://developers.google.com/web/tools/lighthouse) - Automated tool for auditing web page performance, accessibility, and SEO.
-- [WebPageTest](https://www.webpagetest.org/) - Website performance testing tool with real browser analysis.
-
-## Testing Tools
-
-- [Playwright](https://playwright.dev/) - Cross-browser testing framework supporting Chromium, Firefox, and WebKit.
-- [Puppeteer](https://pptr.dev/) - Node.js library for controlling headless Chrome and Chromium browsers.
-- [Selenium](https://selenium.dev/) - Browser automation framework for testing across multiple browsers.
-- [BrowserStack](https://www.browserstack.com/) - Cloud-based cross-browser testing platform with 3000+ browser environments.
-
-## Frameworks & Libraries
-
-- [Next.js](https://nextjs.org/) - React framework with performance optimizations and modern browser targeting.
-- [Vue.js](https://vuejs.org/) - Progressive JavaScript framework for building user interfaces.
-- [Nuxt](https://nuxtjs.org/) - Vue.js framework with server-side rendering and static site generation.
-- [SvelteKit](https://kit.svelte.dev/) - Full-stack web framework built on top of Svelte.
-- [Angular](https://angular.io/) - Platform and framework for building single-page client applications using HTML and TypeScript.
 
 
 ## Contributing
