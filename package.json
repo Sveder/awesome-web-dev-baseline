@@ -1,0 +1,23 @@
+{
+  "name": "awesome-web-dev-baseline",
+  "version": "1.0.0",
+  "description": "> A curated list of awesome tools, libraries, and resources that use and support Web Platform Baseline for web development",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sveder/awesome-web-dev-baseline.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sveder/awesome-web-dev-baseline/issues"
+  },
+  "homepage": "https://github.com/Sveder/awesome-web-dev-baseline#readme",
+  "dependencies": {
+    "cheerio": "^1.1.2"
+  }
+}
