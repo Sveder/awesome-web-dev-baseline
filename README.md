@@ -52,10 +52,6 @@ Web Platform Baseline brings clarity to information about browser support for we
 - [WebDX Community Group](https://www.w3.org/community/webdx/) - Community group that defines Baseline standards.
 
 
-
-
-
-
 ## Contributing
 
 Contributions welcome! Read the [contribution guidelines](contributing.md) first.
