@@ -22,7 +22,8 @@ Web Platform Baseline brings clarity to information about browser support for we
 ## Code Editors & IDEs
 
 - [Visual Studio Code](https://code.visualstudio.com/) - Ships with native Baseline support for CSS and HTML in version 1.100+.
-- [WebStorm](https://www.jetbrains.com/webstorm/) - WebStorm 2025.2+ displays Web Platform Baseline status in documentation popup.
+- [WebStorm](https://www.jetbrains.com/webstorm/) - Jetbrain's WebStorm 2025.2+ displays Web Platform Baseline status in documentation popup.
+
 
 ## Build Tools & Bundlers
 
@@ -50,10 +51,6 @@ Web Platform Baseline brings clarity to information about browser support for we
 - [Baseline 2023](https://web.dev/baseline/2023/) - Features that became interoperable in 2023.
 - [Baseline 2024](https://web.dev/baseline/2024/) - Features that became interoperable in 2024.
 - [WebDX Community Group](https://www.w3.org/community/webdx/) - Community group that defines Baseline standards.
-
-
-
-
 
 
 ## Contributing
