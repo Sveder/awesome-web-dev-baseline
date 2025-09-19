@@ -16,7 +16,6 @@ Web Platform Baseline brings clarity to information about browser support for we
 ## Development Tools
 
 - [Chrome DevTools](https://developer.chrome.com/docs/devtools/) - Chrome 140+ shows Baseline status for CSS properties in Elements panel hover cards.
-- [Browserslist](https://github.com/browserslist/browserslist) - Share target browsers between different front-end tools with Baseline query support.
 - [browserslist-config-baseline](https://www.npmjs.com/package/browserslist-config-baseline) - Apply specific Baseline targets to your toolchain in Vite, Babel, and PostCSS.
 
 ## Code Editors & IDEs
