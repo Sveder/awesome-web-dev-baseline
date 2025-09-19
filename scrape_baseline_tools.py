@@ -85,20 +85,46 @@ class BaselineToolScraper:
             print(f"Error getting content from {url}: {e}")
             return ""
 
-    def analyze_for_baseline_tools(self, title: str, content: str, summary: str = "") -> Dict:
-        """Use OpenAI to analyze content for baseline-related tools"""
-        content_to_analyze = content
-        if summary and len(content) < 500:
-            content_to_analyze = f"{summary}\n\n{content}"
+    def analyze_posts_batch(self, posts_batch: List[Dict]) -> List[Dict]:
+        """Analyze a batch of posts for baseline tools"""
+
+        # Prepare posts data for batch analysis
+        posts_data = []
+        for i, post in enumerate(posts_batch):
+            content = self.get_post_content(post['url'])
+            if content:
+                content_to_analyze = content
+                if post.get('summary') and len(content) < 500:
+                    content_to_analyze = f"{post['summary']}\n\n{content}"
+
+                posts_data.append({
+                    "id": i,
+                    "title": post['title'],
+                    "summary": post.get('summary', ''),
+                    "content": content_to_analyze[:1000]  # Limit content size
+                })
+
+        if not posts_data:
+            return []
+
+        # Create batch analysis prompt
+        posts_text = ""
+        for post_data in posts_data:
+            posts_text += f"""
+POST {post_data['id']}:
+Title: {post_data['title']}
+{f"Summary: {post_data['summary']}" if post_data['summary'] else ""}
+Content: {post_data['content'][:800]}
+
+---
+"""
 
         prompt = f"""
-        Analyze this web development blog post for tools, libraries, or services that support or use Web Platform Baseline.
+        Analyze these web development blog posts for tools, libraries, or services that support or use Web Platform Baseline.
 
         Web Platform Baseline is about browser compatibility and interoperability - tools that help developers ensure their code works across different browsers.
 
-        Title: {title}
-        {f"Summary: {summary}" if summary else ""}
-        Content: {content_to_analyze}
+        {posts_text}
 
         Look for:
         1. Development tools (build tools, bundlers, linters)
@@ -112,14 +138,19 @@ class BaselineToolScraper:
 
         Return a JSON object with this structure:
         {{
-            "has_baseline_tools": true/false,
-            "tools": [
+            "posts": [
                 {{
-                    "name": "Tool Name",
-                    "category": "Development Tools|Code Editors & IDEs|Build Tools & Bundlers|Linting & Code Quality|CSS Tools|Browser Support Tools|AI-Powered Development|Performance & Monitoring|Testing Tools|Frameworks & Libraries",
-                    "description": "Brief description of how it relates to baseline/browser compatibility",
-                    "url": "https://tool-website.com",
-                    "confidence": 0.8
+                    "post_id": 0,
+                    "has_baseline_tools": true/false,
+                    "tools": [
+                        {{
+                            "name": "Tool Name",
+                            "category": "Development Tools|Code Editors & IDEs|Build Tools & Bundlers|Linting & Code Quality|CSS Tools|Browser Support Tools|AI-Powered Development|Performance & Monitoring|Testing Tools|Frameworks & Libraries",
+                            "description": "Brief description of how it relates to baseline/browser compatibility",
+                            "url": "https://tool-website.com",
+                            "confidence": 0.8
+                        }}
+                    ]
                 }}
             ]
         }}
@@ -133,7 +164,7 @@ class BaselineToolScraper:
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,
-                max_tokens=1000
+                max_tokens=2000
             )
 
             result = response.choices[0].message.content.strip()
@@ -141,13 +172,37 @@ class BaselineToolScraper:
             # Extract JSON from response
             json_match = re.search(r'\{.*\}', result, re.DOTALL)
             if json_match:
-                return json.loads(json_match.group())
+                analysis = json.loads(json_match.group())
+                # Extract all tools from all posts
+                batch_tools = []
+                for post_analysis in analysis.get('posts', []):
+                    if post_analysis.get('has_baseline_tools') and post_analysis.get('tools'):
+                        batch_tools.extend(post_analysis['tools'])
+                return batch_tools
             else:
-                return {"has_baseline_tools": False, "tools": []}
+                return []
 
         except Exception as e:
-            print(f"Error analyzing content with OpenAI: {e}")
-            return {"has_baseline_tools": False, "tools": []}
+            print(f"Error analyzing batch with OpenAI: {e}")
+            return []
+
+    def analyze_all_posts_for_baseline_tools(self, posts: List[Dict]) -> List[Dict]:
+        """Use OpenAI to analyze posts in batches for baseline-related tools"""
+        all_tools = []
+        batch_size = 5  # Process 5 posts at a time to avoid token limits
+
+        for i in range(0, len(posts), batch_size):
+            batch = posts[i:i + batch_size]
+            print(f"  Processing batch {i//batch_size + 1}/{(len(posts) + batch_size - 1)//batch_size} ({len(batch)} posts)")
+
+            batch_tools = self.analyze_posts_batch(batch)
+            all_tools.extend(batch_tools)
+
+            # Rate limiting between batches
+            if i + batch_size < len(posts):
+                time.sleep(3)
+
+        return all_tools
 
     def get_existing_tools(self) -> Set[str]:
         """Get list of tools already in README.md using AI analysis"""
@@ -318,33 +373,19 @@ class BaselineToolScraper:
             print("No blog posts found")
             return
 
-        # Analyze each post
+        # Analyze all posts in a single batch
+        print(f"\nAnalyzing all {len(posts)} posts for baseline tools...")
+        all_found_tools = self.analyze_all_posts_for_baseline_tools(posts)
+
+        # Check for duplicates and filter by confidence
         new_tools = []
-        for i, post in enumerate(posts):
-            print(f"\nAnalyzing post {i+1}/{len(posts)}: {post['title'][:50]}...")
-
-            content = self.get_post_content(post['url'])
-            if not content:
-                continue
-
-            analysis = self.analyze_for_baseline_tools(
-                post['title'],
-                content,
-                post.get('summary', '')
-            )
-
-            if analysis.get('has_baseline_tools') and analysis.get('tools'):
-                for tool in analysis['tools']:
-                    # Check if tool is already in README.md using AI-powered duplicate detection
-                    if not self.is_tool_duplicate(tool['name'], existing_tools) and tool['confidence'] >= 0.7:
-                        new_tools.append(tool)
-                        existing_tools.add(tool['name'].lower())
-                        print(f"  Found new tool: {tool['name']}")
-                    else:
-                        print(f"  Skipping duplicate/low confidence tool: {tool['name']} (confidence: {tool.get('confidence', 0)})")
-
-            # Rate limiting for OpenAI API
-            time.sleep(1)
+        for tool in all_found_tools:
+            if not self.is_tool_duplicate(tool['name'], existing_tools) and tool['confidence'] >= 0.7:
+                new_tools.append(tool)
+                existing_tools.add(tool['name'].lower())
+                print(f"  Found new tool: {tool['name']}")
+            else:
+                print(f"  Skipping duplicate/low confidence tool: {tool['name']} (confidence: {tool.get('confidence', 0)})")
 
         # Update README with new tools
         if new_tools:
