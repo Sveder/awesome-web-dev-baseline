@@ -107,6 +107,35 @@ class BaselineToolScraper:
         if not posts_data:
             return []
 
+    def analyze_posts_batch(self, posts_batch: List[Dict], existing_tools: Dict[str, Dict[str, str]]) -> List[Dict]:
+        """Analyze a batch of posts for baseline tools"""
+
+        # Prepare posts data for batch analysis
+        posts_data = []
+        for i, post in enumerate(posts_batch):
+            content = self.get_post_content(post['url'])
+            if content:
+                content_to_analyze = content
+                if post.get('summary') and len(content) < 500:
+                    content_to_analyze = f"{post['summary']}\n\n{content}"
+
+                posts_data.append({
+                    "id": i,
+                    "title": post['title'],
+                    "summary": post.get('summary', ''),
+                    "content": content_to_analyze[:1000]  # Limit content size
+                })
+
+        if not posts_data:
+            return []
+
+        # Create existing tools summary
+        existing_tools_text = ""
+        if existing_tools:
+            existing_tools_text = "\n\nEXISTING TOOLS (do not add these again):\n"
+            for key, tool_data in existing_tools.items():
+                existing_tools_text += f"- {tool_data['name']} ({tool_data.get('url', 'no url')}) - {tool_data.get('description', 'no description')}\n"
+
         # Create batch analysis prompt
         posts_text = ""
         for post_data in posts_data:
@@ -120,13 +149,15 @@ Content: {post_data['content'][:800]}
 """
 
         prompt = f"""
-        Analyze these web development blog posts for tools, libraries, or services that support or use Web Platform Baseline.
+        Analyze these web development blog posts for NEW tools, libraries, or services that support or use Web Platform Baseline.
 
         Web Platform Baseline is about browser compatibility and interoperability - tools that help developers ensure their code works across different browsers.
 
         {posts_text}
 
-        Look for:
+        {existing_tools_text}
+
+        Look for NEW tools (not in the existing list above) that fall into these categories:
         1. Development tools (build tools, bundlers, linters)
         2. Code editors and IDEs
         3. CSS tools and processors
@@ -135,6 +166,8 @@ Content: {post_data['content'][:800]}
         6. AI-powered development tools
         7. Performance monitoring tools
         8. Frameworks and libraries
+
+        IMPORTANT: Do not include any tools that are already in the existing tools list above, including variations of the same tool or products from the same company.
 
         Return a JSON object with this structure:
         {{
@@ -155,7 +188,7 @@ Content: {post_data['content'][:800]}
             ]
         }}
 
-        Only include tools that have clear connections to browser compatibility, cross-browser support, or Web Platform Baseline.
+        Only include NEW tools that have clear connections to browser compatibility, cross-browser support, or Web Platform Baseline.
         Set confidence between 0.0 and 1.0 based on how certain you are about the baseline connection.
         """
 
@@ -186,7 +219,7 @@ Content: {post_data['content'][:800]}
             print(f"Error analyzing batch with OpenAI: {e}")
             return []
 
-    def analyze_all_posts_for_baseline_tools(self, posts: List[Dict]) -> List[Dict]:
+    def analyze_all_posts_for_baseline_tools(self, posts: List[Dict], existing_tools: Dict[str, Dict[str, str]]) -> List[Dict]:
         """Use OpenAI to analyze posts in batches for baseline-related tools"""
         all_tools = []
         batch_size = 5  # Process 5 posts at a time to avoid token limits
@@ -195,7 +228,7 @@ Content: {post_data['content'][:800]}
             batch = posts[i:i + batch_size]
             print(f"  Processing batch {i//batch_size + 1}/{(len(posts) + batch_size - 1)//batch_size} ({len(batch)} posts)")
 
-            batch_tools = self.analyze_posts_batch(batch)
+            batch_tools = self.analyze_posts_batch(batch, existing_tools)
             all_tools.extend(batch_tools)
 
             # Rate limiting between batches
@@ -204,40 +237,42 @@ Content: {post_data['content'][:800]}
 
         return all_tools
 
-    def get_existing_tools(self) -> Set[str]:
-        """Get list of tools already in README.md using AI analysis"""
+    def get_existing_tools(self) -> Dict[str, Dict[str, str]]:
+        """Get list of tools already in README.md with their URLs and descriptions"""
         try:
             with open('README.md', 'r', encoding='utf-8') as f:
                 content = f.read()
 
-            # Use AI to extract tool names more intelligently
+            # Use AI to extract tool names, URLs, and descriptions
             prompt = f"""
-            Extract all tool names from this README content. Focus on actual development tools, libraries, frameworks, and services - not generic terms like "GitHub" or "documentation".
+            Extract all tools from this README content with their names, URLs, and descriptions. Focus on actual development tools, libraries, frameworks, and services.
 
-            Return a JSON array of tool names, normalized (remove extra words like "IDE", "Extension", "Framework" unless they're essential to distinguish the tool):
+            Return a JSON object where each key is the normalized tool name and the value contains name, url, and description:
 
             README Content:
             {content[:4000]}  # Limit content for API
 
             Example format:
-            ["WebStorm", "Visual Studio Code", "Vite", "Webpack", "React", "Vue"]
+            {{
+                "webstorm": {{"name": "WebStorm", "url": "https://www.jetbrains.com/webstorm/", "description": "Jetbrain's WebStorm 2025.2+ displays Web Platform Baseline status in documentation popup"}},
+                "visual studio code": {{"name": "Visual Studio Code", "url": "https://code.visualstudio.com/", "description": "Ships with native Baseline support for CSS and HTML in version 1.100+"}}
+            }}
             """
 
             response = self.client.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
-                max_tokens=800
+                max_tokens=1200
             )
 
             result = response.choices[0].message.content.strip()
 
-            # Extract JSON array from response
-            json_match = re.search(r'\[.*\]', result, re.DOTALL)
+            # Extract JSON object from response
+            json_match = re.search(r'\{.*\}', result, re.DOTALL)
             if json_match:
-                tool_names = json.loads(json_match.group())
-                # Normalize to lowercase for comparison
-                return set(name.lower() for name in tool_names if isinstance(name, str) and len(name) > 2)
+                tools_data = json.loads(json_match.group())
+                return tools_data
             else:
                 # Fallback to regex approach
                 return self._get_existing_tools_fallback(content)
@@ -246,19 +281,27 @@ Content: {post_data['content'][:800]}
             print(f"Error analyzing existing tools with AI, falling back to regex: {e}")
             return self._get_existing_tools_fallback(content if 'content' in locals() else "")
 
-    def _get_existing_tools_fallback(self, content: str) -> Set[str]:
+    def _get_existing_tools_fallback(self, content: str) -> Dict[str, Dict[str, str]]:
         """Fallback regex-based tool extraction"""
-        tool_pattern = r'\[([^\]]+)\]\([^\)]+\)'
-        tools = set()
+        tool_pattern = r'\[([^\]]+)\]\(([^\)]+)\)\s*-\s*(.+?)(?=\n|$)'
+        tools = {}
 
         for match in re.finditer(tool_pattern, content):
-            tool_name = match.group(1).strip()
-            if len(tool_name) > 3 and not tool_name.startswith(('http', 'www')):
-                tools.add(tool_name.lower())
+            name = match.group(1).strip()
+            url = match.group(2).strip()
+            description = match.group(3).strip()
+
+            if len(name) > 3 and not name.startswith(('http', 'www')):
+                normalized_name = name.lower()
+                tools[normalized_name] = {
+                    "name": name,
+                    "url": url,
+                    "description": description
+                }
 
         return tools
 
-    def is_tool_duplicate(self, new_tool_name: str, existing_tools: Set[str]) -> bool:
+    def is_tool_duplicate(self, new_tool_name: str, new_tool_url: str, existing_tools: Dict[str, Dict[str, str]]) -> bool:
         """Use AI to check if a new tool is a duplicate of existing ones"""
         if not existing_tools:
             return False
@@ -267,14 +310,36 @@ Content: {post_data['content'][:800]}
         if new_tool_name.lower() in existing_tools:
             return True
 
-        # Use AI for similarity check
-        existing_list = list(existing_tools)[:10]  # Limit for API
+        # Check URL match (same domain/tool)
+        if new_tool_url:
+            new_parsed = urlparse(new_tool_url)
+            new_domain = new_parsed.netloc.lower().replace('www.', '')
+
+            for tool_data in existing_tools.values():
+                if tool_data.get('url'):
+                    existing_parsed = urlparse(tool_data['url'])
+                    existing_domain = existing_parsed.netloc.lower().replace('www.', '')
+
+                    if new_domain == existing_domain:
+                        return True
+
+        # Use AI for similarity check with existing tool details
+        existing_details = []
+        for key, tool_data in list(existing_tools.items())[:10]:  # Limit for API
+            existing_details.append(f"- {tool_data['name']} ({tool_data.get('url', 'no url')}) - {tool_data.get('description', 'no description')}")
+
         prompt = f"""
-        Is "{new_tool_name}" the same tool as any of these existing tools? Consider variations in naming (e.g., "WebStorm" vs "WebStorm IDE", "VS Code" vs "Visual Studio Code").
+        Is "{new_tool_name}" ({new_tool_url}) the same tool as any of these existing tools? Consider variations in naming, company names, and URLs.
 
-        New tool: {new_tool_name}
+        Examples of duplicates:
+        - "WebStorm" vs "JetBrains WebStorm" vs "JetBrains IDE"
+        - "VS Code" vs "Visual Studio Code"
+        - Tools from the same company/domain
 
-        Existing tools: {', '.join(existing_list)}
+        New tool: {new_tool_name} ({new_tool_url})
+
+        Existing tools:
+        {chr(10).join(existing_details)}
 
         Return only "YES" if it's a duplicate, or "NO" if it's a different tool.
         """
@@ -375,14 +440,18 @@ Content: {post_data['content'][:800]}
 
         # Analyze all posts in a single batch
         print(f"\nAnalyzing all {len(posts)} posts for baseline tools...")
-        all_found_tools = self.analyze_all_posts_for_baseline_tools(posts)
+        all_found_tools = self.analyze_all_posts_for_baseline_tools(posts, existing_tools)
 
         # Check for duplicates and filter by confidence
         new_tools = []
         for tool in all_found_tools:
-            if not self.is_tool_duplicate(tool['name'], existing_tools) and tool['confidence'] >= 0.7:
+            if not self.is_tool_duplicate(tool['name'], tool.get('url', ''), existing_tools) and tool['confidence'] >= 0.7:
                 new_tools.append(tool)
-                existing_tools.add(tool['name'].lower())
+                existing_tools[tool['name'].lower()] = {
+                    'name': tool['name'],
+                    'url': tool.get('url', ''),
+                    'description': tool.get('description', '')
+                }
                 print(f"  Found new tool: {tool['name']}")
             else:
                 print(f"  Skipping duplicate/low confidence tool: {tool['name']} (confidence: {tool.get('confidence', 0)})")
